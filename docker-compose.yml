@@ -1,0 +1,44 @@
+version: '2'
+services:
+  php7.2:
+    build: ./docker/7.2-apache
+    container_name: daniel_web
+    environment:
+      APACHE_RUN_USER: ponte
+      APACHE_RUN_GROUP: ponte
+    depends_on:
+      - db
+    ports:
+      - '8000:80'
+      - '443:443'
+    links:
+      - db
+    volumes:
+      - './docker/7.2-apache/php.ini:/usr/local/etc/php/conf.d/php.ini'
+      - './src:/var/www/html'
+      - './storage:/var/www/storage'
+  db:
+    image: 'mysql:5.7.29'
+    container_name: daniel_db
+    command: '--default-authentication-plugin=mysql_native_password  --explicit_defaults_for_timestamp --sql_mode=""'
+    environment:
+      MYSQL_DATABASE: daniel
+      MYSQL_USER: daniel
+      MYSQL_PASSWORD: '123456'
+      MYSQL_ROOT_PASSWORD: '123456'
+    volumes:
+      - './docker/mysql:/var/lib/mysql'
+    ports:
+      - '3325:3306'
+  myadmin:
+    image: 'phpmyadmin/phpmyadmin:latest'
+    container_name: daniel_myadmin
+    links:
+      - db
+    ports:
+      - '8099:80'
+    environment:
+      PMA_HOST: db
+      PMA_USER: daniel
+      PMA_PASSWORD: '123456'
+      UPLOAD_LIMIT: 300000000
